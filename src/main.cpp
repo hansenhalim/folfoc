@@ -2,55 +2,41 @@
 #include <AFMotor.h>
 #include <Wire.h>
 
-// AF_Stepper Stepper1(48, 1);
-// AF_Stepper Stepper2(48, 2);
+#define MOTOR_A 0
+#define MOTOR_B 1
+
+#define I2C_ADDR 8 // The I2C address of client
+
+AF_Stepper Stepper1(48, 1);
+AF_Stepper Stepper2(48, 2);
 
 void receiveEvent(int numBytes)
 {
   if (numBytes >= 7)
-  { // Make sure at least 7 bytes are received ("<motor_id>,<direction>,<steps>;")
+  {
+    // Make sure at least 7 bytes are received ("<motor_id>,<dir>,<steps>;")
     String command = "";
+
     while (Wire.available())
-    {
-      char c = Wire.read();
-      command += c;
-    }
+      command += Wire.read();
 
-    Serial.println(command);
+    uint8_t motor_id;
+    uint8_t dir;
+    uint16_t steps;
 
-    int motor_id, steps;
-    String direction;
-
-    sscanf(command.c_str(), "%d,%s,%d;", &motor_id, direction, &steps);
+    sscanf(command.c_str(), "%u,%u,%u;", &motor_id, &dir, &steps);
 
     // Perform action based on received command
-    // if (motor_id == 1)
-    // {
-    //   // controlMotor(motor1Pin, direction, steps);
-    //   Serial.print("motor_id: ");
-    //   Serial.println(motor_id);
-    //   Serial.print("direction: ");
-    //   Serial.println(direction);
-    //   Serial.print("steps: ");
-    //   Serial.println(steps);
-    // }
-    // else if (motor_id == 2)
-    // {
-    //   // controlMotor(motor2Pin, direction, steps);
-    //   Serial.print("motor_id: ");
-    //   Serial.println(motor_id);
-    //   Serial.print("direction: ");
-    //   Serial.println(direction);
-    //   Serial.print("steps: ");
-    //   Serial.println(steps);
-    // }
+    switch (motor_id)
+    {
+    case MOTOR_A:
+      Stepper1.step(steps, dir, DOUBLE);
+      break;
 
-    Serial.print("motor_id: ");
-    Serial.println(motor_id);
-    Serial.print("direction: ");
-    Serial.println(direction);
-    Serial.print("steps: ");
-    Serial.println(steps);
+    case MOTOR_B:
+      Stepper2.step(steps, dir, DOUBLE);
+      break;
+    }
   }
 }
 
@@ -58,20 +44,13 @@ void setup()
 {
   Serial.begin(9600);
 
-  String command = "";
+  Stepper1.setSpeed(50); // 50 rpm
+  Stepper2.setSpeed(50); // 50 rpm
 
-  // Wire.begin(8); // Arduino A is the I2C slave with address 8
-  // Wire.onReceive(receiveEvent);
-
-  // Stepper1.setSpeed(50); // 50 rpm
-  // Stepper2.setSpeed(50); // 50 rpm
+  Wire.begin(I2C_ADDR);
+  Wire.onReceive(receiveEvent);
 }
 
 void loop()
 {
-  // Stepper1.step(500, FORWARD, DOUBLE);
-  // Stepper1.step(500, BACKWARD, DOUBLE);
-  // Stepper2.step(500, FORWARD, DOUBLE);
-  // Stepper2.step(500, BACKWARD, DOUBLE);
-  // delay(5000);
 }
