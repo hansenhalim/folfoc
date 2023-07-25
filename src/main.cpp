@@ -59,7 +59,7 @@ void loop()
   }
   if (steps[MOTOR_B] > 0)
   {
-    Stepper1.step(steps[MOTOR_B], dir[MOTOR_B], MICROSTEP);
+    Stepper2.step(steps[MOTOR_B], dir[MOTOR_B], MICROSTEP);
     steps[MOTOR_B] = 0;
   }
 }
